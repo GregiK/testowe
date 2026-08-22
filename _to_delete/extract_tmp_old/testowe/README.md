@@ -36,21 +36,12 @@ npm run db:deploy   # migracje Prisma (produkcja)
 npm run db:studio   # podgląd bazy (Prisma Studio)
 ```
 
-## Wdrożenie (Aderlo Cloud - test.gpczarnecki.pl) - pełna automatyzacja
-Szczegółowa procedura: [`docs/implementation-plan.md`](docs/implementation-plan.md#deployment-aderlo-cloud---pełna-automatyzacja-przez-git).
-
-W skrócie: `git push origin main` uruchamia `.github/workflows/deploy.yml`, który buduje
-całą aplikację (`npm ci`, `prisma generate`, `next build --webpack`) i publikuje gotowy,
-kompletny pakiet (kod + `node_modules` produkcyjne + `.next`) na gałąź `deploy`. Panel Aderlo
-("Wdrożenia" -> "Automatyczne wdrożenie z Gita") ma tę gałąź podpiętą do
-`domains/test.gpczarnecki.pl/public_html` - po każdym pushu klonuje ją 1:1 na serwer i
-restartuje aplikację (świeży `tmp/restart.txt` w pakiecie). Zero ręcznych kroków na serwerze
-przy kolejnych zmianach.
-
-Jednorazowa konfiguracja: rejestracja aplikacji w Node.js Selector (zrobione), zmienne
-środowiskowe `DATABASE_URL`/`SESSION_SECRET` w panelu, podpięcie gałęzi `deploy` w zakładce
-"Wdrożenia". Historia problemów z wcześniejszym podejściem (budowanie bezpośrednio na
-serwerze) - patrz `docs/assumptions.md`.
+## Wdrożenie (Aderlo Cloud - test.gpczarnecki.pl)
+Szczegółowa procedura: [`docs/implementation-plan.md`](docs/implementation-plan.md#deployment-aderlo-cloud---cpanel-setup-nodejs-app).
+W skrócie: wgrać źródła (bez `node_modules`/`.next`/`.git`) do App Root → w cPanel
+"Setup Node.js App" kliknąć "Run NPM Install" (uruchamia install + `prisma generate` +
+`next build` dzięki `postinstall` w `package.json`) → ustawić zmienne środowiskowe
+(`DATABASE_URL`, `SESSION_SECRET`) → `npx prisma migrate deploy` z terminala → restart.
 
 ## Status projektu
 Etap 1-2 (discovery, bootstrap) ukończone. Etap 3 (schemat bazy) gotowy, migracja czeka

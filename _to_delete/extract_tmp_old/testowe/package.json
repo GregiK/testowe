@@ -8,17 +8,17 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "node server.js",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "prisma:generate": "prisma generate",
+    "postinstall": "prisma generate && next build",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^6.10.0",
+    "@prisma/client": "^7.9.1",
     "argon2": "^0.45.1",
     "next": "16.3.1",
     "react": "19.2.8",
@@ -32,7 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
-    "prisma": "^6.10.0",
+    "prisma": "^7.9.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

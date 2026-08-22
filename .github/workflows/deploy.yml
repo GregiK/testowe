@@ -1,0 +1,71 @@
+name: Build i wdrożenie na Aderlo Cloud
+
+# Pełna automatyzacja wdrożenia zgodna z oficjalnym schematem panelu Aderlo
+# ("Wdrożenia" -> "Budowanie w GitHub Actions" + "Automatyczne wdrożenie z Gita"):
+#   1. Ten workflow buduje całą aplikację tutaj (npm ci, prisma generate, next build) -
+#      hosting współdzielony nie buduje niczego, tylko serwuje gotowe pliki.
+#   2. Gotowy, kompletny pakiet (kod + node_modules produkcyjne + .next) trafia jako
+#      commit na osobną gałąź "deploy" (branch zawiera WYŁĄCZNIE gotowe pliki do serwowania,
+#      nigdy kod źródłowy repo w stanie "surowym").
+#   3. Panel Aderlo ("Wdrożenia" -> "Automatyczne wdrożenie z Gita") ma podłączony webhook
+#      obserwujący tę gałąź - po każdym pushu klonuje ją 1:1 do App Root Directory.
+#   4. Plik tmp/restart.txt w pakiecie ma świeżą datę przy każdym buildzie - Passenger
+#      wykrywa zmianę i restartuje proces automatycznie (bez klikania w panelu).
+#
+# Efekt: `git push origin main` na komputerze użytkownika = kompletne, automatyczne
+# wdrożenie na test.gpczarnecki.pl, zero ręcznych kroków na serwerze.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instaluj wszystkie zależności (potrzebne do builda, w tym devDependencies)
+        run: npm ci
+
+      - name: Wygeneruj klienta Prisma (silniki pod GitHub Actions i pod serwer Aderlo)
+        run: npx prisma generate
+
+      - name: Zbuduj aplikację (webpack - zgodnie z ograniczeniami procesów na hostingu docelowym)
+        run: npx next build --webpack
+
+      - name: Usuń zależności deweloperskie (mniejszy, czysto produkcyjny node_modules)
+        run: npm prune --omit=dev
+
+      - name: Złóż kompletny pakiet do wdrożenia
+        run: |
+          rm -rf deploy-package
+          mkdir -p deploy-package
+          cp -r .next deploy-package/
+          cp -r public deploy-package/
+          cp -r node_modules deploy-package/
+          cp -r prisma deploy-package/
+          cp server.js deploy-package/
+          cp package.json deploy-package/
+          cp package-lock.json deploy-package/
+          cp next.config.ts deploy-package/
+          mkdir -p deploy-package/tmp
+          date -u > deploy-package/tmp/restart.txt
+
+      - name: Opublikuj pakiet na gałęzi "deploy"
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy-package
+          publish_branch: deploy
+          force_orphan: true
+          commit_message: "Wdrożenie: build ${{ github.sha }}"
