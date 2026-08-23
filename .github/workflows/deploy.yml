@@ -1,19 +1,14 @@
 name: Build i wdrożenie na Aderlo Cloud
 
-# Pełna automatyzacja wdrożenia zgodna z oficjalnym schematem panelu Aderlo
-# ("Wdrożenia" -> "Budowanie w GitHub Actions" + "Automatyczne wdrożenie z Gita"):
-#   1. Ten workflow buduje całą aplikację tutaj (npm ci, prisma generate, next build) -
-#      hosting współdzielony nie buduje niczego, tylko serwuje gotowe pliki.
-#   2. Gotowy, kompletny pakiet (kod + node_modules produkcyjne + .next) trafia jako
-#      commit na osobną gałąź "deploy" (branch zawiera WYŁĄCZNIE gotowe pliki do serwowania,
-#      nigdy kod źródłowy repo w stanie "surowym").
-#   3. Panel Aderlo ("Wdrożenia" -> "Automatyczne wdrożenie z Gita") ma podłączony webhook
-#      obserwujący tę gałąź - po każdym pushu klonuje ją 1:1 do App Root Directory.
-#   4. Plik tmp/restart.txt w pakiecie ma świeżą datę przy każdym buildzie - Passenger
-#      wykrywa zmianę i restartuje proces automatycznie (bez klikania w panelu).
-#
-# Efekt: `git push origin main` na komputerze użytkownika = kompletne, automatyczne
-# wdrożenie na test.gpczarnecki.pl, zero ręcznych kroków na serwerze.
+# Ten workflow buduje całą aplikację tutaj (npm ci, testy, prisma generate, next build) -
+# hosting współdzielony nie buduje niczego, tylko serwuje gotowe pliki. Gotowy, kompletny
+# pakiet (kod + node_modules produkcyjne + .next) trafia jako commit na osobną gałąź
+# "deploy". Faktyczne wdrożenie na serwer Aderlo odbywa się RĘCZNIE, przez Terminal
+# (SSH) w panelu Aderlo - `bash deploy.sh` (skrypt na serwerze pobiera tę gałąź i
+# podmienia pliki). Automatyczna wysyłka przez API Menedżera Plików Aderlo była
+# testowana (2026-08-23), ale ten panel udostępnia wyłącznie tokeny MCP, nie prosty
+# klucz API kompatybilny z curl/Basic Auth z poziomu GitHub Actions - plan porzucony,
+# patrz docs/assumptions.md.
 
 on:
   push:
@@ -39,6 +34,9 @@ jobs:
 
       - name: Wygeneruj klienta Prisma (silniki pod GitHub Actions i pod serwer Aderlo)
         run: npx prisma generate
+
+      - name: Uruchom testy automatyczne (logika domenowa - hasła, walidacje, wiek)
+        run: npm test
 
       - name: Zbuduj aplikację (webpack - zgodnie z ograniczeniami procesów na hostingu docelowym)
         run: npx next build --webpack
@@ -69,3 +67,6 @@ jobs:
           publish_branch: deploy
           force_orphan: true
           commit_message: "Wdrożenie: build ${{ github.sha }}"
+
+      # Faktyczne wdrożenie na serwer (pobranie tej gałęzi i podmiana plików) odbywa się
+      # ręcznie przez Terminal w panelu Aderlo: `bash deploy.sh`. Patrz docs/assumptions.md.

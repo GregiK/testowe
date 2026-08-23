@@ -105,6 +105,23 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   wielu ról (moderator/support/superadmin) odłożone do czasu, aż pojawi się więcej niż
   jedna osoba zarządzająca platformą.
 
+- **Testy automatyczne (Etap 11) - Vitest, wyłącznie logika domenowa bez bazy danych
+  (2026-08-23).** Wybrano Vitest zamiast Jest - zero natywnych zależności kompilowanych
+  przy instalacji (istotne z uwagi na historię EAGAIN na hostingu, choć testy i tak
+  uruchamiają się wyłącznie w CI/GitHub Actions, nigdy na serwerze produkcyjnym).
+  Pokrycie testami: hashowanie haseł (`scrypt`), liczenie wieku, wszystkie schematy
+  walidacji (`zod`) - rejestracja, profil, swipe, wiadomości, zgłoszenia. Świadomie
+  pominięte na tym etapie: testy integracyjne uderzające w prawdziwą bazę MySQL (`discovery.ts`,
+  endpointy API) - wymagałyby serwisu bazy danych w GitHub Actions; testy e2e (Playwright)
+  najważniejszych ścieżek (rejestracja→profil→swipe→match→czat). Oba warte dodania w
+  kolejnej iteracji, gdy będzie więcej czasu/budżetu na infrastrukturę CI.
+- **Naprawa CI (2026-08-23) - usunięto martwy krok wysyłki przez API Aderlo.** Krok
+  odwoływał się do sekretu `ADERLO_LOGIN_KEY`, który nigdy nie został utworzony (plan API
+  porzucony tego samego dnia, gdy okazało się, że panel Aderlo udostępnia wyłącznie tokeny
+  MCP, nie prosty klucz kompatybilny z Basic Auth/curl) - krok mógł od tamtego momentu
+  cichcem kończyć joba niepowodzeniem, mimo że właściwy build i publikacja na gałąź
+  "deploy" przechodziły poprawnie wcześniej w tym samym uruchomieniu.
+
 ## Produkt
 - Rynek: Polska/UE, użytkownicy pełnoletni, model ogólny (nie niszowy).
 - Model freemium - płatności/subskrypcje odłożone poza MVP.
