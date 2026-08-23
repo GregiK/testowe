@@ -36,9 +36,16 @@ export default async function AppHome() {
         </span>
         <h1 className="text-2xl font-bold text-[var(--foreground)]">Cześć, {name}! 👋</h1>
         <p className="text-sm leading-6 text-[var(--muted)]">
-          Twoje konto i sesja działają poprawnie. Kolejne etapy (uzupełnienie profilu,
-          zdjęcia, odkrywanie innych osób) powstają zgodnie z planem wdrożenia.
+          Twoje konto i sesja działają poprawnie. Kolejne etapy (zdjęcia, odkrywanie innych
+          osób) powstają zgodnie z planem wdrożenia.
         </p>
+        <a
+          href="/app/profil"
+          className="w-full rounded-xl px-4 py-3 text-center text-sm font-semibold text-white transition"
+          style={{ background: "linear-gradient(135deg, var(--spark-1), var(--spark-2))" }}
+        >
+          Uzupełnij profil
+        </a>
         <form action={logoutAction} className="mt-2 w-full">
           <button
             type="submit"
