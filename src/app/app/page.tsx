@@ -40,9 +40,15 @@ export default async function AppHome() {
           osób) powstają zgodnie z planem wdrożenia.
         </p>
         <a
-          href="/app/profil"
+          href="/app/discovery"
           className="w-full rounded-xl px-4 py-3 text-center text-sm font-semibold text-white transition"
           style={{ background: "linear-gradient(135deg, var(--spark-1), var(--spark-2))" }}
+        >
+          Odkrywaj profile
+        </a>
+        <a
+          href="/app/profil"
+          className="w-full rounded-xl border border-[var(--border)] px-4 py-3 text-center text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--spark-1)]/50"
         >
           Uzupełnij profil
         </a>
