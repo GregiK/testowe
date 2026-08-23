@@ -122,6 +122,30 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   cichcem kończyć joba niepowodzeniem, mimo że właściwy build i publikacja na gałąź
   "deploy" przechodziły poprawnie wcześniej w tym samym uruchomieniu.
 
+- **Observability (Etap 12) - logger JSON + health check + strony błędów (2026-08-23).**
+  `src/lib/logger.ts` loguje wyłącznie komunikat błędu, nigdy pełnego obiektu żądania -
+  zapobiega przypadkowemu wyciekowi haseł/tokenów do logów serwera. `/api/health`
+  sprawdza faktyczne połączenie z bazą (nie tylko czy proces Node żyje) - do podpięcia
+  pod zewnętrzny monitoring (np. UptimeRobot), które wykryje np. błędny `DATABASE_URL` po
+  zmianie zmiennych środowiskowych. Dodano `error.tsx`/`global-error.tsx`/`not-found.tsx` -
+  użytkownik nigdy nie widzi surowego stack trace'a błędu.
+- **Kopie zapasowe bazy danych (Etap 12) - ustalenie: automatyczny backup poziomu
+  aplikacji na koncie Aderlo NIE obejmuje regularnie tej domeny, a kopii samej bazy MySQL
+  w ogóle nie było (2026-08-23).** Sprawdzono katalogi `application_backups/` i `backups/`
+  na koncie hostingowym: inne aplikacje na tym koncie mają świeże, automatyczne kopie co
+  kilka dni, ale dla `test.gpczarnecki.pl` ostatnia taka kopia pochodzi z 2025-11-06 (sprzed
+  obecnej wersji aplikacji) - mechanizm automatycznego backupu najwyraźniej przestał
+  obejmować tę domenę (do sprawdzenia/ponownego włączenia w panelu Aderlo, sekcja
+  dotycząca backupów aplikacji Node.js). Katalog `backups/` (prywatny, tryb 700) był
+  całkowicie pusty - **żadna kopia bazy danych nie istniała do tej pory**. Dodano
+  `/home/fkgptbrs/backup-db.sh` (`mysqldump` + gzip + rotacja do 14 najnowszych kopii,
+  zapis do `/home/fkgptbrs/backups/`) - wymaga jednorazowego utworzenia pliku
+  `~/.mysql-backup.cnf` z danymi dostępowymi do MySQL przez samego użytkownika (Claude
+  nie zapisuje haseł do plików na koncie hostingowym - zablokowane świadomie przez
+  zabezpieczenia tej sesji). Zalecane: uruchamiać `backup-db.sh` cyklicznie przez Cron
+  Jobs w panelu Aderlo (do zweryfikowania, czy panel to udostępnia) - do czasu
+  skonfigurowania tego, kopie trzeba uruchamiać ręcznie.
+
 ## Produkt
 - Rynek: Polska/UE, użytkownicy pełnoletni, model ogólny (nie niszowy).
 - Model freemium - płatności/subskrypcje odłożone poza MVP.

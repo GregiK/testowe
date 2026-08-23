@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/session";
+import { logError } from "@/lib/logger";
 
 // Blokada jest jednostronna i natychmiastowa: kończy każdy istniejący (aktywny) match
 // z tą osobą oraz uniemożliwia jej pojawienie się ponownie w discovery/swipe (patrz
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       // Już zablokowany wcześniej - idempotentnie zwracamy sukces.
       return NextResponse.json({ ok: true, alreadyBlocked: true });
     }
-    console.error("block_error", err);
+    logError("block_error", err, { userId });
     return NextResponse.json({ error: "Wystąpił błąd. Spróbuj ponownie później." }, { status: 500 });
   }
 

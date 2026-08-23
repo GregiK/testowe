@@ -5,6 +5,7 @@ import { hashPassword } from "@/lib/password";
 import { createSession } from "@/lib/session";
 import { registerSchema, isAdult } from "@/lib/validation/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { logError } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   // Rate limit per IP - zapobiega masowej rejestracji/enumeracji.
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
       return NextResponse.json({ error: "Konto z tym adresem e-mail już istnieje." }, { status: 409 });
     }
-    console.error("register_error", err);
+    logError("register_error", err);
     return NextResponse.json({ error: "Wystąpił błąd. Spróbuj ponownie później." }, { status: 500 });
   }
 }

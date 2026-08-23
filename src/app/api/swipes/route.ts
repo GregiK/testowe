@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/session";
 import { swipeSchema } from "@/lib/validation/swipe";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { logError } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   const userId = await getCurrentUserId();
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
       // nie ujawniamy szczegółów, żeby nie zdradzać stanu wewnętrznego innym userId.
       return NextResponse.json({ ok: true, alreadySwiped: true, match: false });
     }
-    console.error("swipe_error", err);
+    logError("swipe_error", err, { userId });
     return NextResponse.json({ error: "Wystąpił błąd. Spróbuj ponownie później." }, { status: 500 });
   }
 
