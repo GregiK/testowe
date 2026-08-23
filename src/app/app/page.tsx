@@ -36,8 +36,8 @@ export default async function AppHome() {
         </span>
         <h1 className="text-2xl font-bold text-[var(--foreground)]">Cześć, {name}! 👋</h1>
         <p className="text-sm leading-6 text-[var(--muted)]">
-          Twoje konto i sesja działają poprawnie. Kolejne etapy (zdjęcia, odkrywanie innych
-          osób) powstają zgodnie z planem wdrożenia.
+          Twoje konto i sesja działają poprawnie. Kolejne etapy (zdjęcia) powstają zgodnie
+          z planem wdrożenia.
         </p>
         <a
           href="/app/discovery"
@@ -45,6 +45,12 @@ export default async function AppHome() {
           style={{ background: "linear-gradient(135deg, var(--spark-1), var(--spark-2))" }}
         >
           Odkrywaj profile
+        </a>
+        <a
+          href="/app/matches"
+          className="w-full rounded-xl border border-[var(--border)] px-4 py-3 text-center text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--spark-1)]/50"
+        >
+          Twoje dopasowania
         </a>
         <a
           href="/app/profil"

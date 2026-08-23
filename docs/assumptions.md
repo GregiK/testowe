@@ -65,6 +65,28 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   Baza danych była pusta w momencie zmiany (brak zarejestrowanych kont), więc migracja
   istniejących hashy nie była potrzebna.
 
+- **Discovery (Etap 6) - dopasowanie wzajemne, bez odległości geograficznej (2026-08-23).**
+  Lista kandydatów filtrowana jest w obie strony: moje preferencje (wiek, płeć) względem
+  kandydata ORAZ preferencje kandydata względem mnie - unikamy pokazywania profili, które i
+  tak nigdy nie zobaczyłyby/nie polubiłyby użytkownika z drugiej strony. Filtr odległości
+  geograficznej (`approxLat`/`approxLng`) świadomie pominięty na tym etapie - formularz
+  profilu jeszcze nie zbiera lokalizacji użytkownika (wymaga zgody na geolokalizację +
+  UI, planowane w późniejszym etapie). Discovery na tym etapie to wyłącznie przeglądanie
+  kart (Poprzedni/Następny) - akcje polub/odrzuć i tworzenie matchy to Etap 7.
+
+- **Swipe i match (Etap 7) - atomowo w transakcji, kanoniczne sortowanie userId
+  (2026-08-23).** Polubienie zapisywane jako `Swipe`, a match powstaje wyłącznie gdy druga
+  strona wcześniej polubiła nas (sprawdzenie wzajemności + `upsert` matchu w jednej
+  transakcji Prisma) - `userAId`/`userBId` zawsze posortowane rosnąco, więc unikalny
+  indeks `[userAId, userBId]` wyklucza duplikaty niezależnie od kolejności polubień.
+  Zablokowani użytkownicy (`Block`) są wykluczeni z możliwości swipe'a w obie strony.
+- **Chat (Etap 8) - polling zamiast WebSocket/Socket.IO (2026-08-23).** Hosting
+  współdzielony Aderlo Cloud (Passenger) nie gwarantuje długożyjących połączeń
+  wymaganych przez WebSockety. Zamiast tego czat odświeża wiadomości co 4 sekundy przez
+  zwykłe zapytanie HTTP. Rozwiązanie wystarczające dla MVP i skali testowej - przy
+  realnym wzroście ruchu do rozważenia: Server-Sent Events albo zewnętrzna usługa
+  realtime (np. Pusher/Ably), jeśli hosting docelowy się zmieni.
+
 ## Produkt
 - Rynek: Polska/UE, użytkownicy pełnoletni, model ogólny (nie niszowy).
 - Model freemium - płatności/subskrypcje odłożone poza MVP.
