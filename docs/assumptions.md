@@ -96,6 +96,15 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   `ModerationCase`) zaplanowana w Etapie 10 (panel administratora) - na tym etapie
   zgłoszenia trafiają do bazy, ale nie ma jeszcze interfejsu do ich przeglądania.
 
+- **Panel administratora (Etap 10) - RBAC przez pojedynczą flagę `isAdmin` (2026-08-23).**
+  Na tym etapie skali (jednoosobowy zespół) pełny system ról byłby przedwczesną
+  komplikacją - `User.isAdmin` sprawdzane przez `getCurrentAdminUserId()` w każdym
+  endpointzie/stronie panelu (`/admin`, `/api/admin/*`). Nieautoryzowany dostęp jest
+  przekierowywany na `/app` zamiast pokazywać komunikat "brak dostępu" - nie ujawniamy
+  istnienia trasy. Każda zmiana statusu zgłoszenia zapisywana do `AuditLog`. Skalowanie do
+  wielu ról (moderator/support/superadmin) odłożone do czasu, aż pojawi się więcej niż
+  jedna osoba zarządzająca platformą.
+
 ## Produkt
 - Rynek: Polska/UE, użytkownicy pełnoletni, model ogólny (nie niszowy).
 - Model freemium - płatności/subskrypcje odłożone poza MVP.
