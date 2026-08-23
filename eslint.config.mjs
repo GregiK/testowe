@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // server.js to własny entrypoint pod Passenger (CommonJS, wymagany przez hosting) -
+    // celowo poza regułami TS/ESM stosowanymi do reszty repo. Patrz docs/assumptions.md.
+    "server.js",
+    // Śmieci z wcześniejszego, ręcznego kopiowania plików przez panel hostingu -
+    // do usunięcia z repo (patrz commit porządkujący).
+    "_to_delete/**",
   ]),
 ]);
 

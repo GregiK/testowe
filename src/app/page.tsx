@@ -1,18 +1,53 @@
-export default function Home() {
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUserId } from "@/lib/session";
+
+export default async function Home() {
+  const userId = await getCurrentUserId();
+  if (userId) {
+    redirect("/app");
+  }
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-rose-50 to-white px-6 text-center dark:from-zinc-950 dark:to-black">
-      <main className="flex max-w-xl flex-col items-center gap-6">
-        <span className="rounded-full bg-rose-100 px-4 py-1 text-sm font-medium text-rose-700 dark:bg-rose-950 dark:text-rose-300">
-          Wersja robocza - MVP w budowie
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <main className="flex max-w-md flex-col items-center gap-5">
+        <span className="rounded-full border border-[var(--spark-1)]/30 bg-[var(--spark-1)]/10 px-4 py-1 text-xs font-bold uppercase tracking-wide text-[var(--spark-1)]">
+          Wersja robocza &middot; MVP w budowie
         </span>
-        <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
+        <h1
+          className="text-6xl italic tracking-tight"
+          style={{
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            backgroundImage: "linear-gradient(100deg, var(--foreground) 40%, var(--spark-1) 75%, var(--spark-2) 100%)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+          }}
+        >
           Iskra
         </h1>
-        <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-          Robocza nazwa i identyfikacja aplikacji randkowej (Polska/UE). Ten ekran to
-          punkt startowy - właściwe funkcje (rejestracja, discovery, dopasowania, czat)
-          powstają etapami zgodnie z <code className="rounded bg-black/5 px-1.5 py-0.5 text-sm dark:bg-white/10">docs/implementation-plan.md</code>.
+        <p className="text-sm leading-6 text-[var(--muted)]">
+          Prawdziwe rozmowy, nie przewijanie w nieskończoność. Legalna, bezpieczna
+          aplikacja randkowa budowana od podstaw dla Polski i UE, 18+.
         </p>
+        <div className="mt-2 flex w-full flex-col gap-3">
+          <Link
+            href="/register"
+            className="w-full rounded-xl px-4 py-3 text-center text-sm font-bold text-[#1b1520] transition hover:brightness-105"
+            style={{ backgroundImage: "linear-gradient(135deg, var(--spark-1), var(--spark-2) 70%)" }}
+          >
+            Załóż konto
+          </Link>
+          <Link
+            href="/login"
+            className="w-full rounded-xl border border-[var(--border)] px-4 py-3 text-center text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--spark-2)]/50"
+          >
+            Mam już konto
+          </Link>
+        </div>
+        <span className="mt-4 text-[11px] tracking-wide text-[var(--muted)]/70">
+          Weryfikacja wieku &middot; zgodność z RODO
+        </span>
       </main>
     </div>
   );

@@ -1,8 +1,19 @@
 @import "tailwindcss";
 
+/* Paleta "Iskra" - ciemna, ciepła, spójna z wizją produktu (patrz mockup w docs).
+   Świadomie jeden, dopracowany motyw zamiast jasny/ciemny na tym etapie MVP -
+   do rewizji przy pełnym systemie projektowym w dalszych etapach. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #1b1520;
+  --background-2: #150f19;
+  --surface: #251c2c;
+  --surface-2: #2e2434;
+  --border: #40323d;
+  --foreground: #f5ece6;
+  --muted: #ab97a1;
+  --spark-1: #ff7a45;
+  --spark-2: #ff3d77;
+  --danger: #ff7a7a;
 }
 
 @theme inline {
@@ -12,15 +23,8 @@
   --font-mono: ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
