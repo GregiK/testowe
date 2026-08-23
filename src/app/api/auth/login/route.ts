@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
   const user = await prisma.user.findUnique({ where: { email } });
   // Zawsze wykonaj weryfikację hasła (nawet gdy user nie istnieje) - stały czas odpowiedzi,
   // zapobiega enumeracji kont na podstawie różnic w czasie odpowiedzi.
-  const dummyHash = "$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHQ$invalidhashplaceholder";
+  const dummyHash =
+    "scrypt$16384$8$1$00000000000000000000000000000000$00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
   const ok = await verifyPassword(user?.passwordHash ?? dummyHash, password);
 
   if (!user || !ok || user.deletedAt || !user.isActive) {

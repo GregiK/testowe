@@ -52,6 +52,18 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   opisywany przepływ z przyciskami "Run NPM Install"/"Uruchom skrypt JS" (który dodatkowo
   okazał się wadliwie działać w panelu - przycisk tworzył plik `.lock`, ale nigdy realnie nie
   wywoływał npm).
+- **Hashowanie haseł: `scrypt` (wbudowany moduł `crypto` Node.js) zamiast `argon2`
+  (2026-08-23).** Pakiet `argon2` wymaga skompilowania natywnego modułu przy instalacji
+  (`node-gyp-build`/`node-gyp rebuild`) - na koncie Aderlo Cloud spawnowanie takich procesów
+  kończy się błędem `EAGAIN` (ten sam twardy limit CloudLinux/LVE, który wcześniej blokował
+  `prisma migrate deploy` i `next build` bez `--webpack`). Ponieważ `node_modules` jest
+  budowany raz w CI (GitHub Actions) i commitowany na gałąź `deploy`, docelowo nie powinno to
+  mieć znaczenia - ale każda próba ręcznej naprawy/reinstalacji zależności na serwerze (np. po
+  uszkodzeniu `node_modules`) była niemożliwa właśnie przez `argon2`. Zamieniono na `scrypt`
+  z wbudowanego modułu `crypto` (parametry N=16384, r=8, p=1, zgodne z zaleceniami OWASP) -
+  zero natywnych zależności, więc `npm ci`/`npm install` działa na tym hostingu bez ograniczeń.
+  Baza danych była pusta w momencie zmiany (brak zarejestrowanych kont), więc migracja
+  istniejących hashy nie była potrzebna.
 
 ## Produkt
 - Rynek: Polska/UE, użytkownicy pełnoletni, model ogólny (nie niszowy).
