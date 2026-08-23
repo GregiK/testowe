@@ -28,3 +28,66 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/* Tło stron logowania/rejestracji: zamiast zdjęcia/wideo pary (ryzyko licencyjne +
+   obciążenie hostingu współdzielonego) - subtelna, wolno pulsująca "iskra" w tle,
+   spójna z paletą marki. Patrz docs/assumptions.md. */
+.auth-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--background);
+}
+
+.auth-atmosphere::before,
+.auth-atmosphere::after {
+  content: "";
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  will-change: transform;
+}
+
+.auth-atmosphere::before {
+  top: -20vmax;
+  left: -15vmax;
+  background: radial-gradient(circle, var(--spark-1), transparent 70%);
+  animation: auth-drift-a 22s ease-in-out infinite alternate;
+}
+
+.auth-atmosphere::after {
+  bottom: -25vmax;
+  right: -15vmax;
+  background: radial-gradient(circle, var(--spark-2), transparent 70%);
+  animation: auth-drift-b 26s ease-in-out infinite alternate;
+}
+
+@keyframes auth-drift-a {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(8vmax, 6vmax) scale(1.15);
+  }
+}
+
+@keyframes auth-drift-b {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-6vmax, -8vmax) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-atmosphere::before,
+  .auth-atmosphere::after {
+    animation: none;
+  }
+}

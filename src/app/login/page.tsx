@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUserId } from "@/lib/session";
 import { LoginForm } from "@/components/auth/login-form";
+import { AuthAtmosphere } from "@/components/auth/auth-atmosphere";
 
 export const metadata: Metadata = {
   title: "Zaloguj się - Iskra",
@@ -15,6 +16,7 @@ export default async function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
+      <AuthAtmosphere />
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span
