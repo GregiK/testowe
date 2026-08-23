@@ -87,6 +87,15 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   realnym wzroście ruchu do rozważenia: Server-Sent Events albo zewnętrzna usługa
   realtime (np. Pusher/Ably), jeśli hosting docelowy się zmieni.
 
+- **Blokowanie i zgłaszanie (Etap 9) - blokada natychmiast kończy match (2026-08-23).**
+  Zablokowanie użytkownika: (1) tworzy rekord `Block` sprawdzany przez discovery i swipe
+  (zablokowani nie widzą się nawzajem, nie mogą polubić), (2) natychmiast kończy istniejący
+  aktywny match (`unmatchedAt`/`unmatchedBy`) w tej samej transakcji, więc czat przestaje
+  być dostępny. Zgłoszenie (`Report`) jest niezależne od blokady - można zgłosić bez
+  blokowania i odwrotnie. Kolejka moderacyjna (przegląd zgłoszeń przez admina,
+  `ModerationCase`) zaplanowana w Etapie 10 (panel administratora) - na tym etapie
+  zgłoszenia trafiają do bazy, ale nie ma jeszcze interfejsu do ich przeglądania.
+
 ## Produkt
 - Rynek: Polska/UE, użytkownicy pełnoletni, model ogólny (nie niszowy).
 - Model freemium - płatności/subskrypcje odłożone poza MVP.

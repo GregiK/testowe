@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { getCurrentUserId } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { ChatThread } from "@/components/chat/chat-thread";
+import { SafetyMenu } from "@/components/safety/safety-menu";
 
 export const metadata: Metadata = {
   title: "Rozmowa - Iskra",
@@ -43,10 +44,15 @@ export default async function MatchChatPage({ params }: { params: Promise<{ id: 
     <div className="flex min-h-screen flex-col items-center px-6 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-[var(--foreground)]">{otherName}</h1>
           <a href="/app/matches" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
             ← Wróć
           </a>
+          <h1 className="text-lg font-bold text-[var(--foreground)]">{otherName}</h1>
+          <SafetyMenu
+            targetUserId={other.id}
+            targetName={otherName}
+            redirectOnBlockTo="/app/matches"
+          />
         </div>
         <ChatThread
           matchId={id}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { SafetyMenu } from "@/components/safety/safety-menu";
 
 type Candidate = {
   userId: string;
@@ -111,13 +112,23 @@ export function DiscoveryBrowser({ initial }: { initial: Candidate[] }) {
         </div>
 
         <div className="flex flex-col gap-3 p-5">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-lg font-bold text-[var(--foreground)]">
-              {current.displayName}, {current.age}
-            </h2>
-            {current.city && (
-              <span className="text-sm text-[var(--muted)]">📍 {current.city}</span>
-            )}
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--foreground)]">
+                {current.displayName}, {current.age}
+              </h2>
+              {current.city && (
+                <span className="text-sm text-[var(--muted)]">📍 {current.city}</span>
+              )}
+            </div>
+            <SafetyMenu
+              targetUserId={current.userId}
+              targetName={current.displayName}
+              onBlocked={() => {
+                setCandidates((prev) => prev.filter((c) => c.userId !== current.userId));
+                setIndex((i) => Math.min(i, Math.max(0, candidates.length - 2)));
+              }}
+            />
           </div>
 
           {current.bio && (
