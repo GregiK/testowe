@@ -164,6 +164,34 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   przez EAGAIN na tym hostingu) - jak wszystkie zmiany schematu w tym projekcie, wymaga
   ręcznego importu SQL przez phpMyAdmin (patrz dołączony plik).
 
+- **Logowanie przez Google/Facebook (Etap 15) - ręczny OAuth2 Authorization Code (+PKCE),
+  bez NextAuth.** Aplikacja ma już własny, prosty system sesji (opaque token w httpOnly
+  cookie, hash w tabeli `Session` - patrz `src/lib/session.ts`); wprowadzenie biblioteki
+  typu NextAuth/Auth.js wymagałoby migracji tego modelu sesji na jej własny, co byłoby
+  nieproporcjonalnie dużą zmianą architektoniczną względem tej funkcji. Zamiast tego
+  zaimplementowano ręcznie standardowy przepływ OAuth2 Authorization Code z PKCE dla
+  Google (Facebook go nie wymaga) - wyłącznie przy użyciu wbudowanych modułów Node.js
+  (`crypto`, `fetch`), zero nowych zależności npm, więc zero ryzyka związanego z limitem
+  procesów kompilujących natywne moduły (EAGAIN) na hostingu Aderlo Cloud. Ochrona CSRF:
+  losowy `state` przechowywany w krótkotrwałym (10 min) httpOnly cookie, porównywany przy
+  powrocie z dostawcy. Nowa tabela `OAuthAccount` (provider, providerAccountId, userId,
+  email) pozwala jednemu kontu User mieć wiele powiązanych dostawców; `User.passwordHash`
+  stał się nullable (konta czysto-OAuth nie mają hasła). Łączenie kont: gdy dostawca
+  zwraca zweryfikowany e-mail (Google: `email_verified=true`; Facebook: e-mail jest
+  zwracany przez Graph API wyłącznie dla potwierdzonych adresów) pasujący do istniejącego
+  konta z hasłem, nowe logowanie OAuth zostaje powiązane z tym kontem zamiast tworzyć
+  duplikat. Onboarding: żaden z dostawców nie udostępnia daty urodzenia w podstawowym
+  zakresie uprawnień, a `Profile.birthDate` jest wymagane do weryfikacji 18+ - nowe konta
+  OAuth trafiają na `/onboarding` (nowy ekran: imię, data urodzenia, płeć) zanim uzyskają
+  dostęp do `/app`. Tabela `OAuthAccount` i poluzowanie `User.passwordHash` NIE są
+  wprowadzane migracją Prisma (ten sam powód EAGAIN co wcześniej) - wymagają ręcznego
+  importu SQL przez phpMyAdmin (patrz dołączony plik). Klucze klienta (Client ID/Secret)
+  dla Google i Facebooka konfiguruje właściciel produktu w panelu Aderlo (Node.js
+  Selector), tak samo jak `DATABASE_URL`/`SESSION_SECRET` - bez nich przyciski logowania
+  społecznościowego przekierowują na `/login` z komunikatem "chwilowo niedostępne" zamiast
+  błędu 500. Wymaga też dodania `APP_BASE_URL` w tej samej konfiguracji (używana do
+  zbudowania adresu przekierowania powrotnego) - wcześniej niepotrzebna w produkcji, więc
+  mogła nie zostać jeszcze ustawiona.
 
 ## Zespół i tempo
 - Przyjęto: mały/jednoosobowy zespół, praca etapowa z zatwierdzaniem po każdym kroku

@@ -2,18 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { OAuthButtons } from "./oauth-buttons";
 
 const inputClass =
   "w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--spark-2)]/60";
 
-export function RegisterForm() {
+type Gender = "MALE" | "FEMALE" | "OTHER";
+
+const genderLabel: Record<Gender, string> = {
+  MALE: "Mężczyzna",
+  FEMALE: "Kobieta",
+  OTHER: "Inna",
+};
+
+export function OnboardingForm() {
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [gender, setGender] = useState<Gender>("OTHER");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,10 +28,10 @@ export function RegisterForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName, email, password, birthDate }),
+        body: JSON.stringify({ displayName, birthDate, gender }),
       });
       const data = await res.json();
 
@@ -48,15 +53,16 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="displayName" className="text-xs font-semibold text-[var(--muted)]">
-          Jak mamy Cię przedstawiać?
+          Imię widoczne w profilu
         </label>
         <input
           id="displayName"
+          type="text"
           className={inputClass}
-          placeholder="Np. Kasia"
+          placeholder="np. Kasia"
+          maxLength={50}
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          maxLength={50}
           required
         />
       </div>
@@ -76,36 +82,21 @@ export function RegisterForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-xs font-semibold text-[var(--muted)]">
-          E-mail
+        <label htmlFor="gender" className="text-xs font-semibold text-[var(--muted)]">
+          Płeć
         </label>
-        <input
-          id="email"
-          type="email"
+        <select
+          id="gender"
           className={inputClass}
-          placeholder="ty@przyklad.pl"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          maxLength={255}
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-xs font-semibold text-[var(--muted)]">
-          Hasło (min. 10 znaków)
-        </label>
-        <input
-          id="password"
-          type="password"
-          className={inputClass}
-          placeholder="Wybierz silne hasło"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          minLength={10}
-          maxLength={128}
-          required
-        />
+          value={gender}
+          onChange={(e) => setGender(e.target.value as Gender)}
+        >
+          {(Object.keys(genderLabel) as Gender[]).map((g) => (
+            <option key={g} value={g}>
+              {genderLabel[g]}
+            </option>
+          ))}
+        </select>
       </div>
 
       {error && (
@@ -120,17 +111,8 @@ export function RegisterForm() {
         className="mt-2 w-full rounded-xl px-4 py-3 text-sm font-bold text-[#1b1520] transition disabled:opacity-60"
         style={{ backgroundImage: "linear-gradient(135deg, var(--spark-1), var(--spark-2) 70%)" }}
       >
-        {loading ? "Zakładanie konta..." : "Załóż konto"}
+        {loading ? "Zapisywanie..." : "Przejdź do aplikacji"}
       </button>
-
-      <p className="text-center text-xs text-[var(--muted)]">
-        Masz już konto?{" "}
-        <Link href="/login" className="font-semibold text-[var(--spark-1)]">
-          Zaloguj się
-        </Link>
-      </p>
-
-      <OAuthButtons />
     </form>
   );
 }

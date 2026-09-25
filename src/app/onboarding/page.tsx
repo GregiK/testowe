@@ -1,23 +1,28 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUserId } from "@/lib/session";
-import { LoginForm } from "@/components/auth/login-form";
-import { AuthAtmosphere } from "@/components/auth/auth-atmosphere";
+import { prisma } from "@/lib/prisma";
+import { OnboardingForm } from "@/components/onboarding/onboarding-form";
 
 export const metadata: Metadata = {
-  title: "Zaloguj się - Iskra",
+  title: "Dokończ zakładanie konta - Iskra",
 };
 
-export default async function LoginPage() {
+export default async function OnboardingPage() {
   const userId = await getCurrentUserId();
-  if (userId) {
+  if (!userId) {
+    redirect("/login");
+  }
+
+  const profile = await prisma.profile.findUnique({ where: { userId }, select: { id: true } });
+  if (profile) {
+    // Profil już istnieje (np. użytkownik wrócił na ten adres po zakończeniu onboardingu) -
+    // nie ma czego uzupełniać.
     redirect("/app");
   }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      <AuthAtmosphere />
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span
@@ -32,11 +37,13 @@ export default async function LoginPage() {
           >
             Iskra
           </span>
-          <h1 className="mt-3 text-lg font-bold text-[var(--foreground)]">Witaj z powrotem</h1>
+          <h1 className="mt-3 text-lg font-bold text-[var(--foreground)]">Jeszcze jeden krok</h1>
+          <p className="mt-1 text-xs text-[var(--muted)]">
+            Twój dostawca logowania nie przekazał nam daty urodzenia ani płci - potrzebujemy ich,
+            żeby zweryfikować wiek (18+) i pokazać Ci właściwe osoby.
+          </p>
         </div>
-        <Suspense fallback={null}>
-          <LoginForm />
-        </Suspense>
+        <OnboardingForm />
       </div>
     </div>
   );

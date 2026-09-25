@@ -26,6 +26,12 @@ export default async function AppHome() {
     redirect("/login");
   }
 
+  if (!user.profile) {
+    // Konto założone przez OAuth (Google/Facebook) bez daty urodzenia/płci - dostawca ich
+    // nie udostępnia w podstawowym zakresie uprawnień. Patrz src/app/api/auth/oauth/[provider]/callback/route.ts.
+    redirect("/onboarding");
+  }
+
   const name = user.profile?.displayName ?? user.email;
 
   return (

@@ -50,7 +50,10 @@ enum SubscriptionPlan {
 model User {
   id                String    @id @default(cuid())
   email             String    @unique
-  passwordHash      String
+  // Nullable od Etapu 15 (logowanie OAuth) - konta założone wyłącznie przez Google/Facebook
+  // nie mają hasła. Logowanie hasłem dla takich kont jest niemożliwe (login/route.ts zawsze
+  // porówna z hashem-atrapą, gdy passwordHash === null, więc nie ujawnia sposobu założenia konta).
+  passwordHash      String?
   emailVerifiedAt   DateTime?
   isActive          Boolean   @default(true)
   isAdmin           Boolean   @default(false)
@@ -60,6 +63,7 @@ model User {
 
   profile           Profile?
   sessions          Session[]
+  oauthAccounts     OAuthAccount[]
   photos            Photo[]
   sentSwipes        Swipe[]         @relation("SwipeInitiator")
   receivedSwipes    Swipe[]         @relation("SwipeTarget")
@@ -76,6 +80,26 @@ model User {
   analyticsEvents   AnalyticsEvent[]
 
   @@index([deletedAt])
+}
+
+// Konto zewnętrznego dostawcy logowania (Etap 15) powiązane z kontem User. Jeden User może
+// mieć wiele powiązanych kont (np. Google i Facebook naraz), ale każde konto zewnętrzne
+// (provider + providerAccountId) może być powiązane tylko z jednym User - stąd unikalność.
+// Nie przechowujemy access/refresh tokenów dostawcy - potrzebujemy ich tylko chwilowo przy
+// logowaniu (odczyt e-maila/imienia), więc nie ma ich sensu trzymać w bazie (mniej danych
+// wrażliwych do wycieku, zgodnie z zasadą minimalizacji danych - patrz docs/assumptions.md).
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String   @db.VarChar(20) // "google" | "facebook"
+  providerAccountId String   @db.VarChar(191)
+  email             String?  @db.VarChar(255) // e-mail zgłoszony przez dostawcę w chwili logowania, do wglądu/diagnostyki
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 // Sesja logowania - rotacja przy odświeżeniu, unieważnienie przy zmianie hasła/wylogowaniu.

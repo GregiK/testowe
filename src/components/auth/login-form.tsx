@@ -1,17 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { OAuthButtons } from "./oauth-buttons";
+
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  denied: "Logowanie zostało anulowane.",
+  invalid_state: "Sesja logowania wygasła. Spróbuj ponownie.",
+  invalid_request: "Sesja logowania wygasła. Spróbuj ponownie.",
+  unavailable: "Ta metoda logowania jest chwilowo niedostępna.",
+  no_email: "Twoje konto Google/Facebook nie udostępniło adresu e-mail, więc nie możemy założyć konta.",
+  account_unavailable: "To konto jest niedostępne. Skontaktuj się z pomocą.",
+  failed: "Logowanie się nie powiodło. Spróbuj ponownie.",
+};
 
 const inputClass =
   "w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--spark-2)]/60";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const oauthErrorCode = searchParams.get("oauth_error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    oauthErrorCode ? (OAUTH_ERROR_MESSAGES[oauthErrorCode] ?? OAUTH_ERROR_MESSAGES.failed) : null,
+  );
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -94,6 +109,8 @@ export function LoginForm() {
           Załóż je
         </Link>
       </p>
+
+      <OAuthButtons />
     </form>
   );
 }

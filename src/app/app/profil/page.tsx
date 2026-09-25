@@ -28,7 +28,9 @@ export default async function ProfilePage() {
   });
 
   if (!profile) {
-    redirect("/login");
+    // Konto OAuth bez uzupełnionego onboardingu - "/login" przekierowałoby z powrotem tutaj
+    // w kółko, bo użytkownik jest już zalogowany.
+    redirect("/onboarding");
   }
 
   const allInterests = await prisma.interest.findMany({
