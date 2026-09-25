@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/session";
 import { messageSchema } from "@/lib/validation/message";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { trackEvent } from "@/lib/analytics";
 
 // Nigdy nie ufamy samemu matchId przesłanemu przez klienta - każdorazowo sprawdzamy
 // członkostwo zalogowanego użytkownika w tym matchu.
@@ -65,6 +66,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     data: { matchId: id, senderId: userId, body: parsed.data.body },
     select: { id: true, senderId: true, body: true, createdAt: true },
   });
+
+  await trackEvent("message_sent", { userId });
 
   return NextResponse.json({ message }, { status: 201 });
 }

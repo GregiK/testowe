@@ -152,6 +152,19 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
 - Nazwa robocza aplikacji: "Iskra" - do zatwierdzenia lub zmiany przez właściciela produktu
   przed startem publicznym (branding, domena, znak towarowy - do sprawdzenia prawnego).
 
+- **Beta i podstawowa analityka (Etap 13) - minimalny lejek zdarzeń, bez PII poza samym
+  userId.** Nowa tabela `AnalyticsEvent` (nazwa zdarzenia + opcjonalne minimalne metadane,
+  np. rodzaj swipe'a - NIGDY treść wiadomości, adres IP czy inne dane wrażliwe) - zgodnie
+  z zasadą minimalizacji danych RODO. Śledzone zdarzenia: `user_registered`,
+  `profile_updated`, `swipe`, `match_created`, `message_sent`, `user_blocked` (oraz
+  `oauth_login` od Etapu 15). Awaria zapisu zdarzenia (`trackEvent`) nigdy nie przerywa
+  właściwej akcji użytkownika - błąd jest wyłącznie logowany. Panel administratora
+  (`/admin`) pokazuje te liczby z ostatnich 7 dni jako prosty lejek aktywacji. Tabela
+  `AnalyticsEvent` NIE jest tworzona migracją Prisma (`prisma migrate deploy` blokowany
+  przez EAGAIN na tym hostingu) - jak wszystkie zmiany schematu w tym projekcie, wymaga
+  ręcznego importu SQL przez phpMyAdmin (patrz dołączony plik).
+
+
 ## Zespół i tempo
 - Przyjęto: mały/jednoosobowy zespół, praca etapowa z zatwierdzaniem po każdym kroku
   (zgodnie z globalnymi instrukcjami użytkownika - łatwo się rozprasza, więc każde zadanie

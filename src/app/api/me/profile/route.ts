@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/session";
 import { profileUpdateSchema } from "@/lib/validation/profile";
+import { trackEvent } from "@/lib/analytics";
 
 export async function GET() {
   const userId = await getCurrentUserId();
@@ -91,6 +92,8 @@ export async function PATCH(req: NextRequest) {
       update: { minAge, maxAge, maxDistanceKm, interestedIn },
     });
   });
+
+  await trackEvent("profile_updated", { userId });
 
   return NextResponse.json({ ok: true });
 }

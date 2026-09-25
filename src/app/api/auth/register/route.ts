@@ -6,6 +6,7 @@ import { createSession } from "@/lib/session";
 import { registerSchema, isAdult } from "@/lib/validation/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logError } from "@/lib/logger";
+import { trackEvent } from "@/lib/analytics";
 
 export async function POST(req: NextRequest) {
   // Rate limit per IP - zapobiega masowej rejestracji/enumeracji.
@@ -53,6 +54,8 @@ export async function POST(req: NextRequest) {
     await createSession(user.id, {
       userAgent: req.headers.get("user-agent") ?? undefined,
     });
+
+    await trackEvent("user_registered", { userId: user.id });
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
   } catch (err) {

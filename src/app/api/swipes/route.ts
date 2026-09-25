@@ -5,6 +5,7 @@ import { getCurrentUserId } from "@/lib/session";
 import { swipeSchema } from "@/lib/validation/swipe";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logError } from "@/lib/logger";
+import { trackEvent } from "@/lib/analytics";
 
 export async function POST(req: NextRequest) {
   const userId = await getCurrentUserId();
@@ -87,6 +88,11 @@ export async function POST(req: NextRequest) {
     }
     logError("swipe_error", err, { userId });
     return NextResponse.json({ error: "Wystąpił błąd. Spróbuj ponownie później." }, { status: 500 });
+  }
+
+  await trackEvent("swipe", { userId, metadata: { action } });
+  if (matchId) {
+    await trackEvent("match_created", { userId, metadata: { matchId } });
   }
 
   return NextResponse.json({ ok: true, match: matchId !== null, matchId });

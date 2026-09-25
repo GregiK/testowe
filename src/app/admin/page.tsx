@@ -16,7 +16,9 @@ export default async function AdminPage() {
     redirect("/app");
   }
 
-  const [userCount, matchCount, openReportsCount, reports] = await Promise.all([
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const [userCount, matchCount, openReportsCount, reports, eventCounts] = await Promise.all([
     prisma.user.count({ where: { deletedAt: null } }),
     prisma.match.count({ where: { unmatchedAt: null } }),
     prisma.report.count({ where: { status: "OPEN" } }),
@@ -29,7 +31,23 @@ export default async function AdminPage() {
         target: { select: { email: true, profile: { select: { displayName: true } } } },
       },
     }),
+    prisma.analyticsEvent.groupBy({
+      by: ["name"],
+      where: { createdAt: { gte: sevenDaysAgo } },
+      _count: { _all: true },
+    }),
   ]);
+
+  // Kolejność odzwierciedla lejek aktywacji: rejestracja -> profil -> swipe -> match -> wiadomość.
+  const FUNNEL_ORDER = [
+    { key: "user_registered", label: "Rejestracje" },
+    { key: "profile_updated", label: "Aktualizacje profilu" },
+    { key: "swipe", label: "Swipe'y (polub/pomiń)" },
+    { key: "match_created", label: "Nowe dopasowania" },
+    { key: "message_sent", label: "Wysłane wiadomości" },
+    { key: "user_blocked", label: "Blokady" },
+  ];
+  const eventCountMap = new Map(eventCounts.map((e) => [e.name, e._count._all]));
 
   return (
     <div className="flex min-h-screen flex-col items-center px-6 py-10">
@@ -54,6 +72,23 @@ export default async function AdminPage() {
             <p className="text-2xl font-bold text-[var(--danger)]">{openReportsCount}</p>
             <p className="text-xs text-[var(--muted)]">Zgłoszenia do rozpatrzenia</p>
           </div>
+        </div>
+
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-[var(--muted)]">
+          Lejek aktywacji (ostatnie 7 dni)
+        </h2>
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {FUNNEL_ORDER.map(({ key, label }) => (
+            <div
+              key={key}
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-center"
+            >
+              <p className="text-xl font-bold text-[var(--foreground)]">
+                {eventCountMap.get(key) ?? 0}
+              </p>
+              <p className="text-xs text-[var(--muted)]">{label}</p>
+            </div>
+          ))}
         </div>
 
         <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-[var(--muted)]">

@@ -73,6 +73,7 @@ model User {
   notifications     Notification[]
   subscription      Subscription?
   auditLogs         AuditLog[]
+  analyticsEvents   AnalyticsEvent[]
 
   @@index([deletedAt])
 }
@@ -295,4 +296,21 @@ model AuditLog {
 
   @@index([actorUserId])
   @@index([action])
+}
+
+// Zdarzenia analityczne (Etap 13) - minimalny zestaw pod lejek aktywacji/retencji.
+// Świadomie bez treści wiadomości, adresów IP czy innych danych wrażliwych - wyłącznie
+// nazwa zdarzenia i krótkie, nieosobowe metadane (np. rodzaj swipe'a). Zgodnie z zasadą
+// minimalizacji danych (RODO) - patrz docs/assumptions.md.
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  name      String   @db.VarChar(50)
+  metadata  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([name, createdAt])
+  @@index([userId])
 }
