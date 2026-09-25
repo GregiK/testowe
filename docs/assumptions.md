@@ -203,3 +203,34 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   minimalizacja danych, haszowanie haseł/tokenów). Pełna zgodność (polityka prywatności,
   podstawy prawne przetwarzania, rejestr czynności) wymaga konsultacji z prawnikiem/IOD -
   nie jest to porada prawna.
+
+## Etap 16 - tryb demo (5 profili + wejście bez logowania)
+- **Cel:** umożliwić szybki podgląd działania aplikacji (discovery, swipe, match, czat)
+  bez zakładania prawdziwego konta i bez hasła.
+- **Decyzja: funkcja domyślnie WYŁĄCZONA, sterowana zmienną środowiskową
+  `DEMO_MODE_ENABLED`.** Rozważane opcje: (a) trwale publiczny przycisk "wejdź jako
+  gość" widoczny dla każdego odwiedzającego produkcję, (b) funkcja włączana świadomie
+  zmienną środowiskową i domyślnie wyłączona. Wybrano (b) - to strona logowania na
+  produkcyjnej domenie (`test.gpczarnecki.pl`), na której są już prawdziwi
+  zarejestrowani użytkownicy; trwałe, publiczne obejście logowania na takiej domenie
+  byłoby nieproporcjonalnym ryzykiem bezpieczeństwa (każdy odwiedzający mógłby wejść do
+  panelu aplikacji), a funkcja ma służyć wyłącznie właścicielowi produktu do przeglądu.
+  Kompromis: właściciel musi świadomie ustawić `DEMO_MODE_ENABLED=true` w panelu Aderlo
+  (Node.js Selector), obejrzeć aplikację, a potem tę zmienną usunąć/ustawić na `false`
+  przed udostępnieniem produkcji szerszej grupie.
+- **5 kont demo** (Anna, Piotr, Marta, Tomasz, Kasia) - konta testowe, `passwordHash`
+  ustawiony na `NULL` (ten sam wzorzec co konta czysto-OAuth z Etapu 15 - logowanie
+  wyłącznie przez dedykowaną ścieżkę `/api/auth/demo/[slug]`, nigdy przez zwykły
+  formularz hasła). Rozmieszczone geograficznie blisko siebie (okolice Gdańska) i
+  dobrane pod płeć/preferencje tak, żeby dało się zobaczyć realne dopasowania (match)
+  bez zmiany domyślnych filtrów odległości/wieku. Dane wstawiane ręcznym SQL (ten sam
+  powód co Etap 13/15 - unikanie `prisma migrate`/kompilacji na serwerze z limitem
+  EAGAIN) - patrz dołączony plik `iskra-demo-profiles.sql`. Import jest bezpiecznie
+  powtarzalny (najpierw usuwa wyłącznie wiersze o ID zaczynających się od `demo-`, nigdy
+  nie rusza prawdziwych kont).
+- **Ścieżka logowania:** `GET /api/auth/demo/[slug]` - zwykły klikalny link (bez JS,
+  wzorem startu OAuth z Etapu 15), zablokowany chyba że `DEMO_MODE_ENABLED === "true"`,
+  dodatkowo z rate-limitem. Loguje wyłącznie na jedno z 5 z góry zdefiniowanych ID kont
+  (whitelist w `src/lib/demo.ts`) - nie da się tą drogą zalogować na żadne inne konto.
+  Zdarzenie `demo_login` trafia do analityki (Etap 13) z metadanymi, którego profilu
+  demo użyto.

@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { getCurrentUserId } from "@/lib/session";
 import { LoginForm } from "@/components/auth/login-form";
 import { AuthAtmosphere } from "@/components/auth/auth-atmosphere";
+import { DemoAccess } from "@/components/auth/demo-access";
+import { isDemoModeEnabled } from "@/lib/demo";
 
 export const metadata: Metadata = {
   title: "Zaloguj się - Iskra",
@@ -37,6 +39,7 @@ export default async function LoginPage() {
         <Suspense fallback={null}>
           <LoginForm />
         </Suspense>
+        {isDemoModeEnabled() && <DemoAccess />}
       </div>
     </div>
   );

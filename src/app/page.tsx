@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUserId } from "@/lib/session";
+import { DemoAccess } from "@/components/auth/demo-access";
+import { isDemoModeEnabled } from "@/lib/demo";
 
 export default async function Home() {
   const userId = await getCurrentUserId();
@@ -48,6 +50,7 @@ export default async function Home() {
         <span className="mt-4 text-[11px] tracking-wide text-[var(--muted)]/70">
           Weryfikacja wieku &middot; zgodność z RODO
         </span>
+        {isDemoModeEnabled() && <DemoAccess />}
       </main>
     </div>
   );
