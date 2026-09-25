@@ -1,0 +1,1 @@
+self.__RSC_SERVER_MANIFEST="{\"node\":{\"00fc329217a04ed0342fc494daec0e29d2e716f248\":{\"workers\":{\"app/app/page\":{\"moduleId\":\"67895\",\"async\":false}},\"filename\":\"app/app/actions.ts\",\"exportedName\":\"logoutAction\"}},\"edge\":{},\"encryptionKey\":\"process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY\"}"

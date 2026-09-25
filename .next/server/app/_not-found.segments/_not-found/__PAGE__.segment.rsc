@@ -1,0 +1,23 @@
+1:"$Sreact.fragment"
+2:I[484,[],"OutletBoundary"]
+3:"$Sreact.suspense"
+7:I[484,[],"ViewportBoundary"]
+8:I[484,[],"MetadataBoundary"]
+9:I[6869,[],"IconMark"]
+b:I[7121,[],""]
+c:I[4581,[],""]
+f:I[7267,["39","static/chunks/app/error-0aa7bf198037ebe9.js"],"default"]
+:HL["/_next/static/css/9603325b03d33035.css","style"]
+6:X
+e:X
+e:C
+0:{"buildId":"nAHHtD1brAsWI9uxOfiVW","data":[{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"flex min-h-screen flex-col items-center justify-center px-6 text-center","children":["$","div",null,{"className":"flex max-w-sm flex-col items-center gap-4","children":[["$","span",null,{"className":"text-5xl","children":"🔍"}],["$","h1",null,{"className":"text-2xl font-bold text-[var(--foreground)]","children":"Nie znaleziono strony"}],["$","p",null,{"className":"text-sm leading-6 text-[var(--muted)]","children":"Strona, której szukasz, nie istnieje albo została przeniesiona."}],["$","a",null,{"href":"/app","className":"w-full rounded-xl px-4 py-3 text-center text-sm font-semibold text-white transition","style":{"background":"linear-gradient(135deg, var(--spark-1), var(--spark-2))"},"children":"Wróć do aplikacji"}]]}]}],null,["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"isPartial":"$@5","staleTime":"$6","varyParams":null},{"rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L7",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L8",null,{"children":["$","$3",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Iskra - aplikacja randkowa (wersja robocza)"}],["$","meta","1",{"name":"description","content":"Iskra - legalna, bezpieczna aplikacja randkowa budowana od podstaw (Polska/UE). Wersja robocza / MVP w budowie."}],["$","link","2",{"rel":"icon","href":"/favicon.ico?603d046c9a6fdfbb","type":"image/x-icon","sizes":"16x16"}],["$","$L9","3",{}]]}]}]}],null]}],"isPartial":"$@a","staleTime":"$6","varyParams":null},{"rsc":["$","$1","c",{"children":[null,["$","$Lb",null,{"parallelRouterKey":"children","template":["$","$Lc",null,{}]}]]}],"isPartial":"$@d","staleTime":"$6","varyParams":"$e"},{"rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/9603325b03d33035.css","precedence":"next"}]],["$","html",null,{"lang":"pl","className":"h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col","children":["$","$Lb",null,{"parallelRouterKey":"children","error":"$f","errorStyles":[],"errorScripts":null,"template":["$","$Lc",null,{}],"notFound":[["$","div",null,{"className":"flex min-h-screen flex-col items-center justify-center px-6 text-center","children":["$","div",null,{"className":"flex max-w-sm flex-col items-center gap-4","children":[["$","span",null,{"className":"text-5xl","children":"🔍"}],["$","h1",null,{"className":"text-2xl font-bold text-[var(--foreground)]","children":"Nie znaleziono strony"}],["$","p",null,{"className":"text-sm leading-6 text-[var(--muted)]","children":"Strona, której szukasz, nie istnieje albo została przeniesiona."}],["$","a",null,{"href":"/app","className":"w-full rounded-xl px-4 py-3 text-center text-sm font-semibold text-white transition","style":{"background":"linear-gradient(135deg, var(--spark-1), var(--spark-2))"},"children":"Wróć do aplikacji"}]]}]}],[]]}]}]}]]}],"isPartial":"$@10","staleTime":"$6","varyParams":null}],"isUpgradeableISRFallback":false,"a":"$@11","rootVaryParams":null,"needsRuntimeRequest":"$@12"}
+4:null
+6:300
+12:true
+6:C
+11:0
+a:"$undefined"
+d:"$undefined"
+10:"$undefined"
+5:"$undefined"
