@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUserId } from "@/lib/session";
 import { RegisterForm } from "@/components/auth/register-form";
-import { AuthAtmosphere } from "@/components/auth/auth-atmosphere";
+import { CinematicAuthBackground } from "@/components/auth/cinematic-background";
+import { AuthCardReveal } from "@/components/auth/auth-card-reveal";
 
 export const metadata: Metadata = {
   title: "Załóż konto - Iskra",
@@ -16,7 +17,7 @@ export default async function RegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      <AuthAtmosphere />
+      <CinematicAuthBackground />
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span
@@ -34,7 +35,9 @@ export default async function RegisterPage() {
           <h1 className="mt-3 text-lg font-bold text-[var(--foreground)]">Załóż konto</h1>
           <p className="mt-1 text-xs text-[var(--muted)]">Dostępne wyłącznie dla osób pełnoletnich (18+).</p>
         </div>
-        <RegisterForm />
+        <AuthCardReveal>
+          <RegisterForm />
+        </AuthCardReveal>
       </div>
     </div>
   );
