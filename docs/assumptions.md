@@ -285,3 +285,80 @@ Kompromisy: banner zajmuje teraz realna, widoczna przestrzen na kazdej z 3 stron
 (/, /login, /register), wiec te strony sa wizualnie "ciezsze"/dluzsze na mobile (trzeba
 przewinac nizej do formularza na bardzo malych ekranach) - uznane za akceptowalny
 kompromis, skoro to byl wprost oczekiwany efekt "wow" na pierwszy rzut oka.
+
+## Naprawa 2026-09-25 - realna przyczyna "nic sie nie zmienia" po wdrozeniu
+
+Po Etapach 19-21 uzytkownik zglaszal, ze efekt na stronie wcale sie nie zmienia mimo
+kolejnych "DEPLOY OK". Diagnoza (bezposrednia inspekcja plikow na serwerze przez
+polaczenie z Aderlo): `.next/static/css/*.css` na serwerze zawieral STARY komponent
+`.auth-atmosphere` (sprzed Etapu 19), mimo ze GitHub Actions (build #19, commit Etap 21)
+zakonczyl sie sukcesem i opublikowal swiezy artefakt na branch `deploy`.
+
+Przyczyna: `deploy.sh` pobieral branch `deploy` jako archiwum `.tar.gz` przez
+`https://codeload.github.com/.../tar.gz/refs/heads/deploy`. Ten branch jest publikowany
+przez `peaceiris/actions-gh-pages` z `force_orphan: true` (za kazdym razem NADPISANA,
+osierocona historia, nie fast-forward). Codeload GitHuba cache'uje generowane archiwa i
+przy takim nadpisywaniu historii potrafi przez dluzszy czas zwracac STARA, zbuforowana
+paczke - mimo ze branch realnie sie zmienil i build w Actions byl zielony. Skrypt
+`deploy.sh` (z `set -euo pipefail`) nie mial jak tego wykryc - curl + tar + cp konczyly
+sie bez bledu, tylko na tresci ze starego archiwum.
+
+Naprawa: `deploy.sh` zamiast `curl` + `tar.gz` z codeload robi teraz plytki
+`git clone --depth 1 --branch deploy --single-branch` bezposrednio z
+`https://github.com/GregiK/testowe.git`. Protokol git (smart HTTP) nie ma tej warstwy
+cache archiwow - zawsze zwraca aktualny stan wskazanej galezi. Katalog `.git` z klona
+jest usuwany przed skopiowaniem plikow do `public_html` (nie powinien tam trafiac).
+
+Wniosek na przyszlosc: kazde kolejne "DEPLOY OK" nalezy traktowac jako potwierdzenie
+wylacznie tego, ze skrypt sie wykonal bez bledu - NIE jako dowod, ze najnowszy kod
+faktycznie trafil na serwer. W razie watpliwosci warto zweryfikowac tresc na serwerze
+bezposrednio (np. `.next/static/css/*.css` powinien zawierac klasy Tailwind uzyte w
+najnowszej zmianie), zamiast polegac wylacznie na komunikacie skryptu.
+
+## Naprawa 2026-09-25 (Etap 22) - prawdziwa przyczyna: build CI byl zepsuty od kilku etapow
+
+Kontynuacja poprzedniego wpisu. Po naprawie deploy.sh (git clone zamiast codeload) problem
+NADAL wystepowal - bezposrednia inspekcja plikow na serwerze (node_modules/package.json)
+pokazala brak paczki "framer-motion" w zaleznosciach, mimo ze zostala dodana w Etapie 18.
+To dowodzilo, ze branch "deploy" nie byl aktualizowany od PRZED Etapem 18 - czyli sam
+build w GitHub Actions musial sie nie udawac od dluzszego czasu, mimo ze lista uruchomien
+pokazywala same zielone "sukcesy".
+
+Bezposrednia inspekcja logu konkretnego uruchomienia (run dla commita Etapu 21,
+https://github.com/GregiK/testowe/actions/runs/36167947938) ujawnila prawdziwy status:
+NIEPOWODZENIE (Failure), z bledem TypeScript:
+
+  .next/types/app/api/auth/oauth/[provider]/start/route.ts(14,13): error TS2344:
+  Type '...' does not satisfy the constraint '{ [x: string]: never; }'.
+  Property 'OAUTH_STATE_COOKIE' is incompatible with index signature.
+
+Przyczyna: plik trasy (route.ts) w Next.js App Router smie eksportowac WYLACZNIE metody
+HTTP (GET/POST/...) i kilka specjalnych, zarezerwowanych pol (np. "dynamic", "revalidate").
+Plik `src/app/api/auth/oauth/[provider]/start/route.ts` (od Etapu 15) eksportowal
+dodatkowo wlasna stala `OAUTH_STATE_COOKIE`, zaimportowana pozniej w
+`.../callback/route.ts`. To lamalo walidacje typowanych tras Next.js - ale WYLACZNIE
+podczas pelnego `next build` (generowane pliki w `.next/types`), nie podczas zwyklego
+`tsc --noEmit` na plikach zrodlowych, wiec ten blad byl niewidoczny we wczesniejszej,
+standardowej weryfikacji kazdego etapu.
+
+Naprawa: stala `OAUTH_STATE_COOKIE` zostala przeniesiona z pliku trasy do
+`src/lib/oauth.ts` (zwykly plik biblioteki, nie podlega tej walidacji). Oba pliki tras
+(`start/route.ts` i `callback/route.ts`) importuja ja teraz stamtad. Zweryfikowano pelnym
+`next build --webpack` (dokladnie ta sama komenda co w GitHub Actions) - blad TS2344
+znikl.
+
+Pozostale bledy TypeScript widoczne przy pelnym `next build` w TYM srodowisku (implicit
+"any" w callbackach transakcji Prisma, brak `Prisma.PrismaClientKnownRequestError`) sa
+efektem tego, ze to konkretne srodowisko (piaskownica sesji) nie ma dostepu sieciowego do
+`binaries.prisma.sh`, wiec wygenerowany lokalnie klient Prisma jest niekompletnym
+"stubem" (brakuje mu m.in. klas bledow). Te same, niezmienione pliki zrodlowe (m.in.
+discovery.ts, swipes/route.ts, register/route.ts, admin/page.tsx) byly juz czescia 17
+wczesniejszych, faktycznie udanych buildow w prawdziwym GitHub Actions (ktore MA dostep
+do binarek Prisma) - wiec te bledy nie sa traktowane jako realny problem do naprawy,
+tylko jako ograniczenie tego konkretnego srodowiska testowego.
+
+Wniosek na przyszlosc: sama weryfikacja przez `tsc --noEmit` NIE jest wystarczajaca do
+wykrycia bledow typowanych tras Next.js - od teraz kazdy etap dotykajacy plikow route.ts
+(App Router) powinien byc dodatkowo sprawdzony pelnym `next build --webpack` tam, gdzie
+to mozliwe (w tym srodowisku - z akceptacja bledow Prisma jako znanego ograniczenia
+piaskownicy, ale bez akceptacji bledow zwiazanych z eksportami tras).

@@ -11,8 +11,8 @@ import {
   getRedirectUri,
   exchangeCodeForToken,
   fetchOAuthProfile,
+  OAUTH_STATE_COOKIE,
 } from "@/lib/oauth";
-import { OAUTH_STATE_COOKIE } from "../start/route";
 
 function loginErrorRedirect(req: NextRequest, code: string) {
   return NextResponse.redirect(new URL(`/login?oauth_error=${code}`, req.url));

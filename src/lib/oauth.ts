@@ -13,6 +13,21 @@ export type OAuthProviderId = "google" | "facebook";
 
 export const OAUTH_PROVIDERS: OAuthProviderId[] = ["google", "facebook"];
 
+// Nazwa cookie przechowującej stan przepływu OAuth (state + PKCE verifier).
+// Uwaga (naprawa 2026-09-25): ta stała mieszkała wcześniej w
+// src/app/api/auth/oauth/[provider]/start/route.ts i była stamtąd importowana przez
+// .../callback/route.ts. Next.js (od pewnej wersji) waliduje eksporty z plików route.ts
+// pod typowane trasy i NIE pozwala na dowolne dodatkowe nazwane eksporty (dozwolone są
+// tylko metody HTTP i kilka specjalnych pól jak "dynamic"/"revalidate") - obecność
+// OAUTH_STATE_COOKIE łamała tę walidację i powodowała błąd TS2344 WYŁĄCZNIE podczas
+// pełnego `next build` (nie łapał tego `tsc --noEmit` na samych plikach źródłowych, bo
+// to sprawdzenie dotyczy plików generowanych przez Next w .next/types podczas builda).
+// To właśnie ten błąd od kilku etapów cicho wywalał build w GitHub Actions, mimo że
+// lokalne `tsc --noEmit` i `vitest` przechodziły bez zarzutu - branch "deploy" nie był
+// od dawna aktualizowany. Przeniesienie stałej tutaj (zwykły plik biblioteki, nie trasa)
+// naprawia problem.
+export const OAUTH_STATE_COOKIE = "oauth_flow";
+
 export function isOAuthProvider(value: string): value is OAuthProviderId {
   return (OAUTH_PROVIDERS as string[]).includes(value);
 }

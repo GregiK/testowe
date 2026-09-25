@@ -8,9 +8,8 @@ import {
   generateState,
   generatePkcePair,
   buildAuthorizationUrl,
+  OAUTH_STATE_COOKIE,
 } from "@/lib/oauth";
-
-export const OAUTH_STATE_COOKIE = "oauth_flow";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params;
