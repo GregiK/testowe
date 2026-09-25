@@ -234,3 +234,24 @@ przyjąć bezpieczne założenie zamiast blokować pracę, zapisujemy je tutaj d
   (whitelist w `src/lib/demo.ts`) - nie da się tą drogą zalogować na żadne inne konto.
   Zdarzenie `demo_login` trafia do analityki (Etap 13) z metadanymi, którego profilu
   demo użyto.
+
+## Etap 20 - kinowe tlo na stronie glownej
+
+Problem: uzytkownik po wdrozeniu Etapu 19 (kinowy efekt tla - Ken Burns + iskierki + ziarno
+filmowe na /login i /register) poprosil o to samo tlo takze na stronie glownej "/".
+
+Opcje:
+1. Skopiowac logike CinematicAuthBackground do osobnego komponentu dla strony glownej.
+2. Uzyc wprost istniejacego komponentu CinematicAuthBackground (fixed inset-0 -z-10) rowniez
+   na "/", bez duplikacji kodu.
+
+Wybor: opcja 2. CinematicAuthBackground jest juz w pelni generyczny (nie zawiera nic
+specyficznego dla logowania/rejestracji), wiec import i uzycie go na stronie glownej nie
+wymaga zadnych zmian w komponencie - tylko dodanie <CinematicAuthBackground /> w
+src/app/page.tsx, nad istniejacym <AnimatedHero /> (Etap 18, bez zmian).
+
+Kompromisy: na stronie glownej istnieje juz statyczne zdjecie w karcie (PortraitContent w
+animated-hero.tsx) - to samo zdjecie (/images/hero-portrait.jpg) pojawia sie teraz takze,
+przytlumione (opacity 45%) i w ruchu, w tle. Uznane za spojne z reszta serwisu (ten sam motyw
+wizualny co na /login i /register) i nie koliduje wizualnie - tlo jest mocno przyciemnione i
+rozmyte wzgledem ostrej karty ze zdjeciem na pierwszym planie.
