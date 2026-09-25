@@ -16,10 +16,10 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      <CinematicAuthBackground />
+    <div className="flex min-h-screen flex-col items-center px-6 py-10 sm:justify-center sm:py-12">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
+        <CinematicAuthBackground />
+        <div className="mb-8 mt-8 text-center sm:mt-10">
           <span
             className="text-3xl italic"
             style={{

@@ -3,76 +3,93 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 
-// Etap 19: "kinowy" efekt tła na stronach logowania/rejestracji - że zdjęcie z hero (Twoja
-// kobieta w kawiarni, ta sama co na stronie głównej) w tle formularza, z powolnym efektem
-// Kena Burnsa (delikatny zoom + przesunięcie w pętli, jak w filmowych retrospekcjach),
-// unoszącymi się "iskierkami" w kolorach marki i subtelnym ziarnem filmowym. Nie jest to
-// prawdziwy plik wideo (brak w tym środowisku narzędzia do generowania/pobierania wideo) -
-// to animowane, "żywe" zdjęcie, które daje podobny efekt "wow" bez dodatkowych plików do
-// pobrania przez użytkownika i bez ryzyka licencyjnego nowego materiału.
+// Etap 21: poprzednia wersja (Etap 19/20) byla za subtelna - zdjecie mialo opacity 45%
+// i bylo dodatkowo przycmione ciezka winieta, wiec na mobile (gdzie karta formularza
+// zajmuje niemal caly ekran) efekt byl praktycznie niewidoczny. Uzytkownik chcial
+// wyrazny, "kinowy" efekt przypominajacy krotki, zapetlony filmik z kobieta w kawiarni.
 //
-// Respektujemy prefers-reduced-motion - wtedy zdjęcie jest statyczne (bez zoomu/driftu),
-// iskierki i ziarno też się nie poruszają.
+// Zmiany:
+// - To juz nie jest "fixed inset-0" tlo calej strony, tylko WIDOCZNY pasek/baner w
+//   normalnym ukladzie strony, nad tytulem/formularzem - wiec zawsze zajmuje realna
+//   przestrzen na ekranie (szczegolnie wazne na mobile).
+// - Na mobile jest "pelnoekranowy" (edge-to-edge, wychodzi poza padding kontenera),
+//   wysoki (48% wysokosci ekranu) - to glowny, natychmiast widoczny "wow" element.
+//   Na sm+ (tablet/desktop) staje sie zaokraglona karta o szerokosci kontenera.
+// - Zdjecie ma teraz pelna widocznosc (bez przycmienia opacity), z delikatnym
+//   gradientowym przejsciem na dole do koloru tla (zamiast pelnej ciemnej winiety),
+//   zeby tekst pod spodem zostal czytelny, ale samo zdjecie bylo mocne i wyrazne.
+// - Animacja Ken Burnsa (powolny zoom + pan w petli) jest teraz bardziej zauwazalna
+//   (krotszy cykl, wiekszy zakres przesuniecia) - ma dawac wrazenie "zywego kadru"/
+//   petli wideo, a nie ledwo dostrzegalnego ruchu w tle.
+//
+// Nadal nie jest to prawdziwy plik wideo (brak w tym srodowisku narzedzia do
+// generowania/pobierania wideo) - to animowane zdjecie dajace podobny efekt "wow".
+// Respektujemy prefers-reduced-motion - wtedy zdjecie jest statyczne.
 
 const PARTICLES = [
-  { left: "12%", size: 10, duration: 9, delay: 0 },
-  { left: "24%", size: 6, duration: 12, delay: 1.2 },
-  { left: "38%", size: 8, duration: 10, delay: 2.4 },
-  { left: "52%", size: 5, duration: 13, delay: 0.6 },
-  { left: "66%", size: 9, duration: 11, delay: 3 },
-  { left: "78%", size: 6, duration: 14, delay: 1.8 },
-  { left: "88%", size: 7, duration: 10.5, delay: 2.9 },
+  { left: "10%", size: 10, duration: 8, delay: 0 },
+  { left: "22%", size: 6, duration: 10, delay: 1 },
+  { left: "36%", size: 8, duration: 9, delay: 2 },
+  { left: "50%", size: 5, duration: 11, delay: 0.5 },
+  { left: "64%", size: 9, duration: 9.5, delay: 2.6 },
+  { left: "78%", size: 6, duration: 12, delay: 1.6 },
+  { left: "90%", size: 7, duration: 10.5, delay: 2.2 },
 ];
 
 export function CinematicAuthBackground() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-[var(--background)]" aria-hidden="true">
-      {/* Zdjęcie w tle z powolnym efektem Kena Burnsa (zoom + pan w pętli) */}
+    <div
+      aria-hidden="true"
+      className="relative left-1/2 -mx-6 -mt-10 h-[48vh] max-h-[520px] min-h-[300px] w-screen -translate-x-1/2 overflow-hidden bg-[var(--background)] sm:left-auto sm:mx-0 sm:mt-0 sm:h-80 sm:w-full sm:max-h-none sm:translate-x-0 sm:rounded-3xl"
+    >
+      {/* Zdjecie z zauwazalnym efektem Kena Burnsa (zoom + pan w petli) - pelna
+          widocznosc, bez przycmienia, zeby dawac wrazenie "zywego kadru". */}
       <motion.div
         className="absolute inset-0"
-        initial={{ scale: 1.08, x: 0, y: 0 }}
+        initial={{ scale: 1.06, x: 0, y: 0 }}
         animate={
           reduceMotion
-            ? { scale: 1.08 }
+            ? { scale: 1.06 }
             : {
-                scale: [1.08, 1.18, 1.08],
-                x: [0, -18, 0],
-                y: [0, -12, 0],
+                scale: [1.06, 1.18, 1.06],
+                x: [0, -26, 0],
+                y: [0, -10, 0],
               }
         }
         transition={
           reduceMotion
             ? undefined
-            : { duration: 26, ease: "easeInOut", repeat: Infinity }
+            : { duration: 16, ease: "easeInOut", repeat: Infinity }
         }
       >
         <Image
           src="/images/hero-portrait.jpg"
-          alt=""
+          alt="Kobieta siedząca przy stoliku z filiżanką kawy - kinowy motyw Iskry"
           fill
           priority
-          className="object-cover object-[center_20%] opacity-45"
+          className="object-cover object-[center_18%]"
           sizes="100vw"
         />
       </motion.div>
 
-      {/* Przyciemnienie + winieta - czytelność formularza nad zdjęciem */}
+      {/* Delikatne przejscie na dole (i gorze) do koloru tla - dla plynnego polaczenia
+          z tytulem/formularzem. Bez pelnej winiety, zeby zdjecie zostalo wyrazne. */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 0%, var(--background) 78%), linear-gradient(180deg, var(--background) 0%, transparent 22%, transparent 70%, var(--background) 100%)",
+            "linear-gradient(180deg, transparent 62%, var(--background) 100%), linear-gradient(0deg, transparent 88%, var(--background) 100%)",
         }}
       />
-      {/* Delikatna poświata w kolorach marki */}
+      {/* Delikatna poswiata w kolorach marki - dla spojnosci, ale nie przytlacza zdjecia */}
       <div
-        className="absolute inset-0 opacity-40 mix-blend-overlay"
+        className="absolute inset-0 opacity-25 mix-blend-overlay"
         style={{ background: "linear-gradient(135deg, var(--spark-1), transparent 55%, var(--spark-2))" }}
       />
 
-      {/* Unoszące się "iskierki" */}
+      {/* Unoszace sie "iskierki" */}
       {!reduceMotion &&
         PARTICLES.map((p, i) => (
           <motion.span
@@ -84,8 +101,9 @@ export function CinematicAuthBackground() {
               height: p.size,
               backgroundImage: "linear-gradient(135deg, var(--spark-1), var(--spark-2) 70%)",
               filter: "blur(0.5px)",
+              boxShadow: "0 0 6px var(--spark-1)",
             }}
-            animate={{ y: ["0vh", "-105vh"], opacity: [0, 0.9, 0.9, 0] }}
+            animate={{ y: ["0%", "-340%"], opacity: [0, 1, 1, 0] }}
             transition={{
               duration: p.duration,
               delay: p.delay,
@@ -96,12 +114,16 @@ export function CinematicAuthBackground() {
         ))}
 
       {/* Subtelne ziarno filmowe (SVG noise), dla klimatu kinowej retrospekcji */}
-      <svg className="absolute inset-0 h-full w-full opacity-[0.05]">
+      <svg className="absolute inset-0 h-full w-full opacity-[0.06]">
         <filter id="filmGrain">
           <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
         </filter>
         <rect width="100%" height="100%" filter="url(#filmGrain)" />
       </svg>
+
+      {/* Cienka ramka w kolorach marki - "kinowy kadr" (widoczna tylko na sm+, gdzie
+          element jest zaokraglona karta, nie pelnoekranowy pasek) */}
+      <div className="pointer-events-none absolute inset-0 hidden sm:block sm:rounded-3xl sm:ring-1 sm:ring-inset sm:ring-[var(--spark-1)]/25" />
     </div>
   );
 }

@@ -255,3 +255,33 @@ animated-hero.tsx) - to samo zdjecie (/images/hero-portrait.jpg) pojawia sie ter
 przytlumione (opacity 45%) i w ruchu, w tle. Uznane za spojne z reszta serwisu (ten sam motyw
 wizualny co na /login i /register) i nie koliduje wizualnie - tlo jest mocno przyciemnione i
 rozmyte wzgledem ostrej karty ze zdjeciem na pierwszym planie.
+
+## Etap 21 - wyrazniejszy kinowy efekt (szczegolnie mobile)
+
+Problem: po wdrozeniu Etapu 20 uzytkownik zglosil, ze efekt nadal jest zly - zdjecie w
+tle bylo prawie niewidoczne (opacity 45% + ciezka winieta), a na mobile formularz
+zajmuje niemal caly ekran, wiec "kinowego" tla w ogole nie bylo widac. Oczekiwanie:
+wyrazny, zauwazalny efekt przypominajacy krotki, zapetlony "filmik" z kobieta, ktory
+"wow"-uje od razu, zwlaszcza na telefonie.
+
+Opcje:
+1. Dalej podkrecac parametry starego podejscia (tlo calej strony, wyzsza opacity).
+   Ryzyko: formularz i tak zakrywa wiekszosc ekranu na mobile, wiec efekt nadal
+   bylby ledwo widoczny.
+2. Zmienic charakter komponentu z "ukrytego tla pod spodem" na WIDOCZNY, zajmujacy
+   realna przestrzen element w normalnym ukladzie strony (baner na gorze), pelna
+   szerokosc ekranu (edge-to-edge) na mobile, zaokraglona karta na sm+.
+
+Wybor: opcja 2. CinematicAuthBackground przestal byc "fixed inset-0 -z-10" i stal sie
+elementem w przeplywie dokumentu - wysokim (48% wysokosci ekranu) pelnoekranowym
+paskiem na mobile (przez trik left-1/2 + -translate-x-1/2 + w-screen, wychodzacy poza
+padding kontenera), a na sm+ zaokraglona karta o szerokosci kolumny formularza/strony
+glownej. Zdjecie ma teraz pelna widocznosc (bez przycmienia opacity), tylko z
+delikatnym gradientowym przejsciem do koloru tla na krawedziach (zamiast pelnej
+ciemnej winiety). Animacja Ken Burnsa jest bardziej zauwazalna (krotszy cykl - 16s
+zamiast 26s, wiekszy zakres przesuniecia), a iskierki dostaly delikatny glow.
+
+Kompromisy: banner zajmuje teraz realna, widoczna przestrzen na kazdej z 3 stron
+(/, /login, /register), wiec te strony sa wizualnie "ciezsze"/dluzsze na mobile (trzeba
+przewinac nizej do formularza na bardzo malych ekranach) - uznane za akceptowalny
+kompromis, skoro to byl wprost oczekiwany efekt "wow" na pierwszy rzut oka.

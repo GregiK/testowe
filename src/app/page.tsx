@@ -11,13 +11,18 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      {/* Etap 20: to samo kinowe tlo (Ken Burns + iskierki + ziarno filmowe) co na
-          /login i /register (Etap 19), teraz takze na stronie glownej. Tresc hero
-          (AnimatedHero, Etap 18) zostaje bez zmian i wjezdza nad tlem. */}
-      <CinematicAuthBackground />
+    <div className="flex min-h-screen flex-col items-center px-6 py-10 sm:justify-center sm:py-12">
       <main className="flex w-full max-w-5xl flex-col items-center">
-        <AnimatedHero demoModeEnabled={isDemoModeEnabled()} />
+        {/* Etap 21: ten sam wyrazny, kinowy baner (Ken Burns + iskierki + ziarno
+            filmowe) co na /login i /register, teraz takze na stronie glownej, jako
+            widoczny element na gorze strony (nie ukryte tlo). Tresc hero
+            (AnimatedHero, Etap 18) zostaje bez zmian i wjezdza ponizej banera. */}
+        <div className="w-full">
+          <CinematicAuthBackground />
+        </div>
+        <div className="mt-8 w-full sm:mt-12">
+          <AnimatedHero demoModeEnabled={isDemoModeEnabled()} />
+        </div>
       </main>
     </div>
   );
