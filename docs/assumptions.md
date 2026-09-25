@@ -402,3 +402,28 @@ Weryfikacja: `tsc --noEmit` (bez nowych bledow w zmienionych plikach - istniejac
 bledy sa znanym ograniczeniem piaskownicy Prisma, patrz sekcja wyzej), `vitest run`
 (44/44 testy przechodza), oraz krytycznie `next build --webpack` (bez nowych bledow
 zwiazanych ze zmienionymi plikami - powtarzajac lekcje z Etapu 22).
+
+## Etap 24 - spojny styl na stronie glownej (logo na banerze, bez powielonego zdjecia)
+
+Kontekst: uzytkownik pokazal tinder.com jako odniesienie i poprosil o "cos podobnego".
+Po wyjasnieniu, ze nie kopiujemy brandingu/kodu/UI Tindera (zasada projektu), ustalono
+zakres: najpierw dokonczyc spojny styl (ten sam kinowy baner z tytulem "na zdjeciu" co
+na /login i /register - Etap 23) takze na stronie glownej, pozniej osobnym, wiekszym
+etapem zbudowac mechanike kart do przesuwania (swipe/discovery).
+
+Zmiana: logo "Iskra" (h1) i odznaka "Wersja robocza - MVP w budowie" przeniesione z
+AnimatedHero na kinowy baner (CinematicAuthBackground, jako children) - dokladnie ten
+sam wzorzec co w Etapie 23. Dodatkowo usunieto z AnimatedHero osobny, statyczny
+"PortraitContent" (to samo zdjecie hero-portrait.jpg, wczesniej wyswietlane DRUGI raz
+obok tekstu na sm+) - bylo to zbedne powielenie tej samej fotografii na jednej stronie
+od czasu wprowadzenia kinowego banera w Etapie 21. Layout AnimatedHero jest teraz
+jednokolumnowy, wysrodkowany (tylko paragraf, przyciski CTA, stopka o RODO/wieku,
+ewentualny dostep demo) - bez zmiany logiki (redirect zalogowanego, tryb demo).
+
+Odznaka "Wersja robocza" na zdjeciu dostala dodatkowe tlo (bg-black/20 + backdrop-blur)
+dla czytelnosci obramowania na roznych fragmentach zdjecia, w odroznieniu od czystego
+drop-shadow uzytego przy logo/naglowkach na /login i /register - odznaka ma cienkie
+obramowanie tekstowe, ktore samym drop-shadow bylo mniej czytelne niz pelny tekst h1.
+
+Weryfikacja: tsc --noEmit i next build --webpack bez nowych bledow w zmienionych
+plikach (src/components/home/animated-hero.tsx, src/app/page.tsx), vitest 44/44.
