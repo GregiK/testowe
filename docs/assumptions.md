@@ -427,3 +427,34 @@ obramowanie tekstowe, ktore samym drop-shadow bylo mniej czytelne niz pelny teks
 
 Weryfikacja: tsc --noEmit i next build --webpack bez nowych bledow w zmienionych
 plikach (src/components/home/animated-hero.tsx, src/app/page.tsx), vitest 44/44.
+
+## Proces wdrozeniowy od Etapu 24 - automatyzacja bez zipow
+
+Problem: dotychczasowy proces (spakowanie zmienionych plikow do zip, SendUserFile,
+reczne rozpakowanie przez uzytkownika, uruchomienie PowerShell .ps1 kopiujacego pliki
+i robiacego git add/commit/push) byl uciazliwy - uzytkownik: "naucz sie auto publikacji
+tych wszystkich wdrozen bo to jest meczace to wypakowywanie aktualizacji."
+
+Rozwiazanie: komputer uzytkownika jest podlaczony przez most urzadzen (folder
+"Aplikacja randkowa" jest polaczony), co pozwala:
+1. Zapisac zmienione pliki BEZPOSREDNIO do testowe-repo na jego komputerze
+   (device_commit_files) - bez zipa i bez reczengo rozpakowywania.
+2. Wykonac `git add` i `git commit` zdalnie (device_bash) - bez akcji uzytkownika.
+   Uwaga: polaczony folder domyslnie blokuje kasowanie plikow (w tym wewnetrznych
+   plikow tymczasowych/lock gita) - trzeba raz na sesje popro sic o zgode na kasowanie
+   w tym folderze (device_request_delete_permission), inaczej `git add`/`commit`
+   failuja przy sprzataniu plikow tymczasowych .git. Trzeba tez ustawic lokalnie (NIE
+   --global) `git config user.name/user.email` w tym repo, bo srodowisko mostu nie ma
+   wlasnej tozsamosci gita.
+
+Ograniczenie (nie do obejscia): `git push` wymaga danych logowania do GitHub, ktorych
+to srodowisko NIE ma (i ze wzgledow bezpieczenstwa nie mozna tam wpisywac
+tokenow/hasel). Uzytkownik nadal musi sam wykonac `git push origin main` we wlasnym
+PowerShell (gdzie ma juz zapisane dane logowania). Podobnie brak narzedzia do
+zdalnego wykonania `bash deploy.sh` na hostingu Aderlo (dostepne sa tylko
+odczyt/zapis plikow, nie ogolne polecenia powloki) - to tez zostaje reczne.
+
+Nowy, uproszczony proces per etap: (1) Claude pisze i commituje zmiany bezposrednio
+w repo na komputerze uzytkownika, (2) uzytkownik uruchamia `git push origin main`,
+(3) sprawdza zielony build w GitHub Actions, (4) uruchamia `bash deploy.sh` w
+Terminalu Aderlo. Zero zipow, zero PowerShell .ps1, zero recznego kopiowania plikow.
