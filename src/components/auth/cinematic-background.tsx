@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -36,12 +37,16 @@ const PARTICLES = [
   { left: "90%", size: 7, duration: 10.5, delay: 2.2 },
 ];
 
-export function CinematicAuthBackground() {
+// Etap 23: napisy (logo "Iskra", tytuł strony) przenoszą się NA baner ze zdjęciem
+// (nakładka na dole banera z mocniejszym przyciemnieniem dla czytelności), zamiast
+// stać osobno na czarnym tle pod spodem - to właśnie "napisy mają być ogólnie w tle"
+// z prośby użytkownika. `children` renderuje się jako nakładka przy dolnej krawędzi
+// banera; strony przekazują tam swój blok tytułowy zamiast renderować go osobno.
+export function CinematicAuthBackground({ children }: { children?: ReactNode }) {
   const reduceMotion = useReducedMotion();
 
   return (
     <div
-      aria-hidden="true"
       className="relative left-1/2 -mx-6 -mt-10 h-[48vh] max-h-[520px] min-h-[300px] w-screen -translate-x-1/2 overflow-hidden bg-[var(--background)] sm:left-auto sm:mx-0 sm:mt-0 sm:h-80 sm:w-full sm:max-h-none sm:translate-x-0 sm:rounded-3xl"
     >
       {/* Zdjecie z zauwazalnym efektem Kena Burnsa (zoom + pan w petli) - pelna
@@ -74,13 +79,15 @@ export function CinematicAuthBackground() {
         />
       </motion.div>
 
-      {/* Delikatne przejscie na dole (i gorze) do koloru tla - dla plynnego polaczenia
-          z tytulem/formularzem. Bez pelnej winiety, zeby zdjecie zostalo wyrazne. */}
+      {/* Przejscie na dole (i gorze) do koloru tla - dla plynnego polaczenia z reszta
+          strony. Dolna czesc jest teraz mocniej przyciemniona (od 40% zamiast 62%),
+          bo to wlasnie tam nakladamy tytul (patrz "children" nizej) - potrzebuje
+          solidnego kontrastu pod tekstem, gorna czesc zdjecia zostaje w pelni wyrazna. */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, transparent 62%, var(--background) 100%), linear-gradient(0deg, transparent 88%, var(--background) 100%)",
+            "linear-gradient(180deg, transparent 40%, var(--background) 96%), linear-gradient(0deg, transparent 88%, var(--background) 100%)",
         }}
       />
       {/* Delikatna poswiata w kolorach marki - dla spojnosci, ale nie przytlacza zdjecia */}
@@ -124,6 +131,15 @@ export function CinematicAuthBackground() {
       {/* Cienka ramka w kolorach marki - "kinowy kadr" (widoczna tylko na sm+, gdzie
           element jest zaokraglona karta, nie pelnoekranowy pasek) */}
       <div className="pointer-events-none absolute inset-0 hidden sm:block sm:rounded-3xl sm:ring-1 sm:ring-inset sm:ring-[var(--spark-1)]/25" />
+
+      {/* Etap 23: nakladka z tytulem strony (logo "Iskra", naglowek) - renderuje sie
+          NA zdjeciu, przy dolnej krawedzi banera, w obszarze mocno przyciemnionym
+          przez gradient powyzej. z-10, zeby byc nad ziarnem/iskierkami/ramka. */}
+      {children && (
+        <div className="absolute inset-x-0 bottom-0 z-10 px-6 pb-5 text-center sm:px-8 sm:pb-6">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

@@ -362,3 +362,43 @@ wykrycia bledow typowanych tras Next.js - od teraz kazdy etap dotykajacy plikow 
 (App Router) powinien byc dodatkowo sprawdzony pelnym `next build --webpack` tam, gdzie
 to mozliwe (w tym srodowisku - z akceptacja bledow Prisma jako znanego ograniczenia
 piaskownicy, ale bez akceptacji bledow zwiazanych z eksportami tras).
+
+## Etap 23 - napisy (logo "Iskra", tytul strony) jako naklada na zdjeciu, nie osobno na czarnym tle
+
+Problem: po Etapie 21 kinowy baner byl juz dobrze widoczny ("jest prawie idealnie"), ale
+tytul strony (logo "Iskra" + naglowek, np. "Witaj z powrotem") renderowal sie w osobnym
+bloku POD banerem, na plaskim, czarnym tle (var(--background)). Uzytkownik: "te napisy
+maja byc ogolnie w tle.. Czarne tlo w miare fajnie wyglada ale popraw to." - czarne tlo
+reszty strony ma zostac, ale napisy tytulowe maja znalezc sie NA zdjeciu (jako naklada),
+a nie stac osobno ponizej.
+
+Opcje:
+1. Przeniesc caly tytul na zdjecie jako naklada (absolutne pozycjonowanie w dolnej
+   czesci banera, nad wzmocnionym gradientem dla czytelnosci).
+2. Zostawic tytul pod spodem, ale dodac np. cien/podswietlenie - nie adresuje wprost
+   proby uzytkownika ("maja byc W tle" = na zdjeciu, nie obok niego).
+
+Wybor: opcja 1. `CinematicAuthBackground` przyjmuje teraz opcjonalny prop `children` -
+renderowany jako naklada (`absolute inset-x-0 bottom-0 z-10`) w dolnej czesci banera,
+w obszarze mocniej przyciemnionym przez gradient (zmieniony z "transparent 62%" na
+"transparent 40%, tlo 96%" - wiecej miejsca na czytelny tekst). Strony /login i
+/register przekazuja tam swoj blok tytulowy (logo + naglowek, dla /register takze
+adnotacje 18+) zamiast renderowac go osobno w oddzielnym divie ponizej.
+
+Kolor tekstu zmieniony na bialy (byl var(--foreground), ciemny/kremowy - czytelny na
+czarnym tle, ale nieczytelny na zdjeciu) z drop-shadow (ciemny cien) dla kontrastu
+niezaleznie od jasnosci fragmentu zdjecia pod spodem. Logo "Iskra" zachowuje gradientowy
+tekst marki (spark-1/spark-2) z dodatkowym drop-shadow.
+
+Zakres: zmiana objela /login i /register (dokladnie te strony byly pokazane na
+zrzutach ekranu uzytkownika). Strona glowna (/) NIE zostala zmieniona w tym etapie -
+jej naglowek jest czescia bardziej zlozonego, animowanego komponentu AnimatedHero
+(badge + h1 + paragraf + przyciski + demo-dostep razem), wiec rozdzielenie go na
+"tytul na banerze" + "reszta pod spodem" jest znaczaco bardziej inwazyjna zmiana.
+Zgodnie z zasada malych, sprawdzalnych etapow - zostawiono to jako oddzielna decyzja
+do potwierdzenia z uzytkownikiem, jesli efekt na /login i /register spodoba mu sie.
+
+Weryfikacja: `tsc --noEmit` (bez nowych bledow w zmienionych plikach - istniejace
+bledy sa znanym ograniczeniem piaskownicy Prisma, patrz sekcja wyzej), `vitest run`
+(44/44 testy przechodza), oraz krytycznie `next build --webpack` (bez nowych bledow
+zwiazanych ze zmienionymi plikami - powtarzajac lekcje z Etapu 22).
